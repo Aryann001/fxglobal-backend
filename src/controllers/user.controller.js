@@ -2,7 +2,7 @@ import User from "../models/user.model.js";
 import ApiHandler from "../utils/apiHandler.js";
 import catchAsyncHanlder from "../utils/catchAsyncHandler.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
-import CAValidator from "cryptocurrency-address-validator";
+import CAValidator from "multicoin-address-validator";
 
 export const register = catchAsyncHanlder(async (req, res, next) => {
   const {
@@ -21,7 +21,7 @@ export const register = catchAsyncHanlder(async (req, res, next) => {
     return next(new ErrorHandler(`User already exist`, 400));
   }
 
-  if (!CAValidator.validate(receiveAddress, "BTC")) {
+  if (!CAValidator.validate(receiveAddress, "bnb")) {
     return next(new ErrorHandler(`Enter a valid Receive Address`, 400));
   }
 
