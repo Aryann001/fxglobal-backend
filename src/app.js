@@ -15,8 +15,10 @@ app.get("/", (req, res) => {
 });
 
 import UserRoutes from "./routes/user.route.js";
+import AdminRoutes from "./routes/admin.route.js"
 
 app.use("/api/v1", UserRoutes);
+app.use("/api/v1/admin", AdminRoutes);
 
 app.use(errorMiddleware);
 

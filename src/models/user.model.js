@@ -35,8 +35,16 @@ const userSchema = mongoose.Schema(
     referralCode: {
       type: String,
     },
+    directBusiness: {
+      type: Number,
+      default: 0
+    },
+    levelBusiness: {
+      type: Number,
+      default: 0
+    },
   },
-  { timeStamps: true }
+  { timestamps: true }
 );
 
 userSchema.pre("save", async function (next) {
