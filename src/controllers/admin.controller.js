@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User from "../models/user.model.js";
 import ApiHandler from "../utils/apiHandler.js";
 import catchAsyncHanlder from "../utils/catchAsyncHandler.js";
@@ -12,9 +13,36 @@ export const getAllUsers = catchAsyncHanlder(async (req, res, next) => {
 export const getUserById = catchAsyncHanlder(async (req, res, next) => {
   const { userId } = req.params;
 
-  const user = await User.findById(userId);
+  if (!userId) return next(new ErrorHandler("Invalid user ID", 400));
 
-  if (!user) return next(new ErrorHandler("Invalid user ID", 400));
+  const compareObjId = new mongoose.Types.ObjectId(userId)
+
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: compareObjId,
+      },
+    },
+    // {
+    //   $lookup: {
+    //     from: "finances",
+    //     localField: "_id",
+    //     foreignField: "userId",
+    //     as: "finance",
+    //   },
+    // },
+    // {
+    //   $addFields: {
+    //     finance: {
+    //       $first: "$finance",
+    //     },
+    //   },
+    // },
+  ]);
+  // console.log(user);
+
+  if (!user?.length)
+    return next(new ErrorHandler("Invalid user ID or user not exist", 400));
 
   res.status(200).json(new ApiHandler(200, user, "User details"));
 });

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import validator from "validator";
 import bcrypt from "bcrypt";
 
-const userSchema = mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
@@ -35,13 +35,17 @@ const userSchema = mongoose.Schema(
     referralCode: {
       type: String,
     },
-    directBusiness: {
-      type: Number,
-      default: 0
+    referredBy: {
+      type: String,
     },
-    levelBusiness: {
+    package: {
       type: Number,
-      default: 0
+      enum: [0, 200, 500, 3000, 5000, 10000, 20000],
+      default: 0,
+    },
+    packagePassed: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
