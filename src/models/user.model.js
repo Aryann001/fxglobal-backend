@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema(
     },
     referredBy: {
       type: String,
+      required: [true, "Referral is required"],
     },
     package: {
       type: Number,
