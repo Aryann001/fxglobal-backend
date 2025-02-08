@@ -36,6 +36,12 @@ export const register = catchAsyncHanlder(async (req, res, next) => {
     prefix: "FXGLOBAL",
   });
 
+  const isReferredBy = await User.findOne({ referralCode: referredBy });
+
+  if (!isReferredBy) {
+    return next(new ErrorHandler(`Invalid Referral`, 400));
+  }
+
   const newUser = await User.create({
     firstName,
     lastName,
