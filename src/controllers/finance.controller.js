@@ -79,7 +79,8 @@ export const handleRequest = catchAsyncHanlder(async (req, res) => {
   userFinance.directBusiness =
     userFinance.directBusiness + paymentRequestData.package;
 
-  userFinance.levelBusiness = userFinance.directBusiness;
+  userFinance.levelBusiness =
+    userFinance.levelBusiness + userFinance.directBusiness;
 
   await userFinance.save({ validateBeforeSave: false });
 

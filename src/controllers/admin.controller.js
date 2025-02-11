@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import User from "../models/user.model.js";
+import Finance from "../models/finance.model.js";
 import ApiHandler from "../utils/apiHandler.js";
 import catchAsyncHanlder from "../utils/catchAsyncHandler.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
@@ -15,7 +16,7 @@ export const getUserById = catchAsyncHanlder(async (req, res, next) => {
 
   if (!userId) return next(new ErrorHandler("Invalid user ID", 400));
 
-  const compareObjId = new mongoose.Types.ObjectId(userId)
+  const compareObjId = new mongoose.Types.ObjectId(userId);
 
   const user = await User.aggregate([
     {
@@ -79,4 +80,56 @@ export const updateUserDetails = catchAsyncHanlder(async (req, res, next) => {
   );
 
   res.status(200).json(new ApiHandler(200, user, "User Updated"));
+});
+
+export const sendMoney = catchAsyncHanlder(async (req, res, next) => {
+  const { email, money } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return next(new ErrorHandler("User not exist", 400));
+  }
+
+  user.package = money;
+  user.packagePassed = true;
+
+  await user.save({ validateBeforeSave: false });
+
+  const userFinance = await Finance.findOne({ userId: user._id });
+
+  userFinance.directBusiness = userFinance.directBusiness + money;
+
+  userFinance.levelBusiness =
+    userFinance.levelBusiness + userFinance.directBusiness;
+
+  await userFinance.save({ validateBeforeSave: false });
+
+  if (user.referredBy !== "") {
+    const master = await User.aggregate([
+      {
+        $match: {
+          referralCode: user.referredBy,
+        },
+      },
+      {
+        $project: {
+          _id: { $toString: "$_id" },
+        },
+      },
+    ]);
+
+    const masterFinance = await Finance.findOne({ userId: master[0]._id });
+
+    masterFinance.levelBusiness =
+      masterFinance.levelBusiness + userFinance.levelBusiness;
+
+    masterFinance.activeDirect = masterFinance.activeDirect + 1;
+
+    await masterFinance.save({ validateBeforeSave: false });
+  }
+
+  return res
+    .status(200)
+    .json(new ApiHandler(200, user, "Money sent successfully"));
 });
