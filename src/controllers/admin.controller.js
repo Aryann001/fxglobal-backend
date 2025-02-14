@@ -103,7 +103,7 @@ export const sendMoney = catchAsyncHanlder(async (req, res, next) => {
   userFinance.levelBusiness =
     userFinance.levelBusiness + userFinance.directBusiness;
 
-  userFinance.activationDate = new Date.now();
+  userFinance.activationDate = new Date();
 
   await userFinance.save({ validateBeforeSave: false });
 
