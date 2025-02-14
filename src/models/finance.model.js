@@ -10,6 +10,9 @@ const financeSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  activationDate: {
+    type: Date,
+  },
   levelBusiness: {
     type: Number,
     default: 0,
@@ -35,6 +38,10 @@ const financeSchema = new mongoose.Schema({
     default: 0,
   },
   withdraw: {
+    type: Number,
+    default: 0,
+  },
+  referralBonusEarning: {
     type: Number,
     default: 0,
   },

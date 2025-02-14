@@ -82,6 +82,8 @@ export const handleRequest = catchAsyncHanlder(async (req, res) => {
   userFinance.levelBusiness =
     userFinance.levelBusiness + userFinance.directBusiness;
 
+  userFinance.activationDate = new Date.now();
+
   await userFinance.save({ validateBeforeSave: false });
 
   if (user.referredBy !== "") {
