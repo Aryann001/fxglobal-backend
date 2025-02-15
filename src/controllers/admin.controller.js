@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import User from "../models/user.model.js";
 import Finance from "../models/finance.model.js";
+import WalletRequest from "../models/walletRequest.model.js";
 import ApiHandler from "../utils/apiHandler.js";
 import catchAsyncHanlder from "../utils/catchAsyncHandler.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
@@ -134,4 +135,106 @@ export const sendMoney = catchAsyncHanlder(async (req, res, next) => {
   return res
     .status(200)
     .json(new ApiHandler(200, user, "Money sent successfully"));
+});
+
+// //////// Wallet /////////////
+
+export const getAllWalletRequests = catchAsyncHanlder(
+  async (req, res, next) => {
+    const requests = await WalletRequest.find({});
+
+    return res.status(200).json(new ApiHandler(200, requests, "All Requests"));
+  }
+);
+
+export const sendWithdrawalRequest = catchAsyncHanlder(
+  async (req, res, next) => {
+    const { userId, name, email, amount, userWalletId } = req.body;
+
+    const requestExist = await WalletRequest.findOne({ userId });
+
+    if (requestExist) {
+      return next(
+        new ErrorHandler("Request is already sent. Wait for the response", 400)
+      );
+    }
+
+    const userFinance = await Finance.findOne({ userId });
+
+    if (userFinance) {
+      if (userFinance.earned < amount) {
+        return next(new ErrorHandler("Insufficient Balance", 401));
+      }
+    }
+
+    if (amount < 20) {
+      return next(
+        new ErrorHandler("Withdrawal amount should be more than 20 USDT", 400)
+      );
+    }
+
+    const request = await WalletRequest.create({
+      userId,
+      name,
+      email,
+      amount,
+      userWalletId,
+    });
+
+    return res
+      .status(201)
+      .json(
+        new ApiHandler(
+          201,
+          request,
+          "Withdrawal Request has been sent successfully"
+        )
+      );
+  }
+);
+
+export const deleteWithdrawalRequest = catchAsyncHanlder(async (req, res) => {
+  const { requestId } = req.params;
+
+  const walletRequestData = await WalletRequest.findByIdAndDelete(requestId);
+
+  return res
+    .status(200)
+    .json(
+      new ApiHandler(200, walletRequestData, "Payment Deleted successfully")
+    );
+});
+
+export const handleWithdrawalRequest = catchAsyncHanlder(async (req, res) => {
+  const { requestId } = req.params;
+
+  let walletRequestData = await WalletRequest.findById(requestId);
+
+  if (!walletRequestData) {
+    return next(new ErrorHandler("Invalid Request ID", 400));
+  }
+
+  const userFinance = await Finance.findOne({
+    userId: walletRequestData.userId,
+  });
+
+  if (walletRequestData.amount < userFinance.earned) {
+    userFinance.earned = userFinance.earned - walletRequestData.amount;
+
+    userFinance.withdraw = userFinance.withdraw + walletRequestData.amount;
+
+    await userFinance.save({ validateBeforeSave: false });
+  }
+
+  walletRequestData = await WalletRequest.findByIdAndDelete(requestId);
+
+  return res
+    .status(200)
+    .json(
+      new ApiHandler(
+        200,
+        walletRequestData,
+        "Payment Request sent successfully"
+      )
+    );
 });
