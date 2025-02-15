@@ -13,7 +13,7 @@ dotenv.config({
 connectDB();
 
 // Field that updates every 24 hrs
-cron.schedule("0 0 * * *", async () => {
+cron.schedule("0 12 * * *", async () => {
   try {
     const finances = await Finance.find({});
 
