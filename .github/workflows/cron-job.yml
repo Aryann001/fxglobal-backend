@@ -1,0 +1,12 @@
+name: Run Cron Job
+
+on:
+  schedule:
+    - cron: "* * * * *" # Runs at 12 AM UTC daily
+
+jobs:
+  run-cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Express API
+        run: curl -X GET https://fxglobal-backend.vercel.app/api/v1/run-cron
