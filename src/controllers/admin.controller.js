@@ -92,12 +92,19 @@ export const sendMoney = catchAsyncHanlder(async (req, res, next) => {
     return next(new ErrorHandler("User not exist", 400));
   }
 
+  const isUserPackageAlreadyPassed = user.packagePassed;
+
   user.package = money;
-  user.packagePassed = true;
+  
+  if (!isUserPackageAlreadyPassed) {
+    user.packagePassed = true;
+  }
 
   await user.save({ validateBeforeSave: false });
 
   const userFinance = await Finance.findOne({ userId: user._id });
+
+  const oldUserLevelBusiness = userFinance.levelBusiness;
 
   userFinance.directBusiness = userFinance.directBusiness + money;
 
@@ -124,10 +131,17 @@ export const sendMoney = catchAsyncHanlder(async (req, res, next) => {
 
     const masterFinance = await Finance.findOne({ userId: master[0]._id });
 
-    masterFinance.levelBusiness =
-      masterFinance.levelBusiness + userFinance.levelBusiness;
+    if (!isUserPackageAlreadyPassed) {
+      masterFinance.levelBusiness =
+        masterFinance.levelBusiness + userFinance.levelBusiness;
 
-    masterFinance.activeDirect = masterFinance.activeDirect + 1;
+      masterFinance.activeDirect = masterFinance.activeDirect + 1;
+    }
+
+    masterFinance.levelBusiness =
+      masterFinance.levelBusiness +
+      userFinance.levelBusiness -
+      oldUserLevelBusiness;
 
     await masterFinance.save({ validateBeforeSave: false });
   }

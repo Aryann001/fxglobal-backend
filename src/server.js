@@ -13,14 +13,14 @@ dotenv.config({
 connectDB();
 
 // Field that updates every 24 hrs
-cron.schedule("0 12 * * *", async () => {
+cron.schedule("* * * * *", async () => {
   try {
     const finances = await Finance.find({});
 
     for (let singleUserFinance of finances) {
       if (singleUserFinance.directBusiness > 0) {
         const incrementValue =
-          (0.07 * singleUserFinance.directBusiness) / 30;
+          (0.07 * singleUserFinance.directBusiness) / 43200;
         singleUserFinance.earned += incrementValue;
 
         await singleUserFinance.save({ validateBeforeSave: false });

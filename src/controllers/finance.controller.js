@@ -61,20 +61,25 @@ export const handleRequest = catchAsyncHanlder(async (req, res) => {
 
   let paymentRequestData = await PaymentRequest.findById(requestId);
 
-  const user = await User.findByIdAndUpdate(
-    paymentRequestData.userId,
-    {
-      package: paymentRequestData.package,
-      packagePassed: true,
-    },
-    {
-      new: true,
-      runValidators: true,
-      useFindAndModify: false,
-    }
-  );
+  const user = await User.findById(paymentRequestData.userId);
+
+  if (!user) {
+    return next(new ErrorHandler("User not exist", 400));
+  }
+
+  const isUserPackageAlreadyPassed = user.packagePassed;
+
+  user.package = money;
+
+  if (!isUserPackageAlreadyPassed) {
+    user.packagePassed = true;
+  }
+
+  await user.save({ validateBeforeSave: false });
 
   const userFinance = await Finance.findOne({ userId: user._id });
+
+  const oldUserLevelBusiness = userFinance.levelBusiness;
 
   userFinance.directBusiness =
     userFinance.directBusiness + paymentRequestData.package;
@@ -102,10 +107,17 @@ export const handleRequest = catchAsyncHanlder(async (req, res) => {
 
     const masterFinance = await Finance.findOne({ userId: master[0]._id });
 
-    masterFinance.levelBusiness =
-      masterFinance.levelBusiness + userFinance.levelBusiness;
+    if (!isUserPackageAlreadyPassed) {
+      masterFinance.levelBusiness =
+        masterFinance.levelBusiness + userFinance.levelBusiness;
 
-    masterFinance.activeDirect = masterFinance.activeDirect + 1;
+      masterFinance.activeDirect = masterFinance.activeDirect + 1;
+    }
+
+    masterFinance.levelBusiness =
+      masterFinance.levelBusiness +
+      userFinance.levelBusiness -
+      oldUserLevelBusiness;
 
     await masterFinance.save({ validateBeforeSave: false });
   }
