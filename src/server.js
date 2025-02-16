@@ -19,7 +19,7 @@ app.get("/api/v1/run-cron", async (req, res) => {
     for (let singleUserFinance of finances) {
       if (singleUserFinance.directBusiness > 0) {
         const incrementValue =
-          (0.07 * singleUserFinance.directBusiness) / 43200;
+          (0.07 * singleUserFinance.directBusiness) / 30;
         singleUserFinance.earned += incrementValue;
 
         await singleUserFinance.save({ validateBeforeSave: false });

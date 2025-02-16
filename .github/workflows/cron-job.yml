@@ -2,7 +2,7 @@ name: Run Cron Job
 
 on:
   schedule:
-    - cron: "* * * * *" # Runs at 12 AM UTC daily
+    - cron: "18 30 * * *" # Runs at 12 AM UTC daily
 
 jobs:
   run-cron:
