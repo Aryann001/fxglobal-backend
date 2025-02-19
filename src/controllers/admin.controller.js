@@ -136,13 +136,13 @@ export const sendMoney = catchAsyncHanlder(async (req, res, next) => {
         masterFinance.levelBusiness + userFinance.levelBusiness;
 
       masterFinance.activeDirect = masterFinance.activeDirect + 1;
-    }
+    } else {
 
     masterFinance.levelBusiness =
       masterFinance.levelBusiness +
       userFinance.levelBusiness -
       oldUserLevelBusiness;
-
+    }
     await masterFinance.save({ validateBeforeSave: false });
   }
 
