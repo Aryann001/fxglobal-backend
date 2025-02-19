@@ -112,13 +112,13 @@ export const handleRequest = catchAsyncHanlder(async (req, res) => {
         masterFinance.levelBusiness + userFinance.levelBusiness;
 
       masterFinance.activeDirect = masterFinance.activeDirect + 1;
-    }
+    } else {
 
     masterFinance.levelBusiness =
       masterFinance.levelBusiness +
       userFinance.levelBusiness -
       oldUserLevelBusiness;
-
+    }
     await masterFinance.save({ validateBeforeSave: false });
   }
 
