@@ -96,7 +96,7 @@ npm start
 
 ---
 
-## 📬 API Endpoints (Examples)
+## 📬 API Endpoints
 
 > Base URL: `https://fxglobal-backend.vercel.app`
 
